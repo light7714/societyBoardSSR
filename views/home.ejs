@@ -1,0 +1,47 @@
+<%- include('includes/head.ejs') %>
+
+<body id="page-top" style="background: linear-gradient(var(--bs-primary) 14%, #48ccff);">
+    <div id="wrapper">
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+
+                <%- include('includes/navigation.ejs') %>
+
+            </div>
+        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
+    <ul class="event-list">
+		<% if (events.length > 0) { %>
+			<% for (let event of events) { %>
+				<li class="event-list-item">
+					<div class="row" style="padding: 20px;margin: 0 auto;width: 70%;">
+						<div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4" style="padding:0px;">
+							<div style="background-image:url(&quot;assets/img/mac.jpeg&quot;);height:50vh;background-repeat:no-repeat;background-size:cover;background-position:center;"></div>
+						</div>
+						<div class="w-100 d-sm-block d-md-none d-lg-none d-xl-none"></div>
+						<div class="col" style="padding:0px;">
+							<div class="card">
+								<div class="card-body" style="height:50vh;">
+									<h6 class="text-muted card-subtitle mb-2">Society: <%= event.societyName %></h6>
+									<h4 class="card-title" style="color: black;"><%= event.eventName %></h4>
+									<p class="card-text"><%= event.eventDesc %></p><hr><a class="card-link link-info" href="<%= event.website %>">Society Website</a><a class="card-link link-info" href="<%= event.discord %>">Society Discord</a>
+									<div class="row">
+										<div class="col" style="background-color:#ebf0f3;"><em><%= event.startDate %></em></div>
+									</div>
+								</div>
+							</div> 
+						</div>
+					</div>
+				</li>
+			<% } %>
+		<% } else { %>
+			<div class="inline">
+				<h1 class="display-2 alert alert-dark custom-1" style="color: black;">No events going on right now!</h1>
+			</div>
+		<% } %>
+	</ul>
+	<!-- <div class="inline">
+		<h1 class="display-2 alert alert-dark custom-1" style="color: black;">No events going on right now!</h1>
+	</div> -->
+
+    <%- include('includes/end.ejs') %>
