@@ -13,8 +13,6 @@ give proper validation err msgs
 check for success flash msg
 **IMP** get 404 page
 if someone else's event id is entered manually, then handle later
-**IMP** endDate >= startDate
-**IMP** handle image and logo upload
 
 
 Not Authenticated: Signup, login

@@ -4,7 +4,6 @@ module.exports = class Society {
 	constructor(
 		societyId,
 		societyName,
-		logo,
 		societyDesc,
 		dateEst,
 		website,
@@ -12,7 +11,7 @@ module.exports = class Society {
 	) {
 		this.societyId = societyId;
 		this.societyName = societyName;
-		this.logo = logo;
+		// this.logo = logo;
 		this.societyDesc = societyDesc;
 		this.dateEst = dateEst;
 		this.website = website;
@@ -22,11 +21,10 @@ module.exports = class Society {
 	save() {
 		// INSERT INTO `society-board`.`societies` (`societyId`, `societyName`) VALUES ('12', 'Hefe');
 		return db.execute(
-			'INSERT INTO `society-board`.societies (societyId, societyName, logo, societyDesc, dateEst, website, discord) VALUES (?, ?, ?, ?, ?, ?, ?)',
+			'INSERT INTO `society-board`.societies (societyId, societyName, societyDesc, dateEst, website, discord) VALUES (?, ?, ?, ?, ?, ?)',
 			[
 				this.societyId,
 				this.societyName,
-				this.logo,
 				this.societyDesc,
 				this.dateEst,
 				this.website,

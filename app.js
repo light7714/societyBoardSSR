@@ -58,7 +58,7 @@ app.set('views', 'views');
 app.use(express.urlencoded({ extended: false }));
 
 app.use(
-	multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
+	multer({ storage: fileStorage, fileFilter: fileFilter }).single('poster')
 );
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -148,7 +148,7 @@ console.log('hii');
 app.use(homeRoutes);
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
-// app.use(errorController.get404);
+app.use(errorController.get404);
 
 //CHANGE, according to error status code
 app.use((error, req, res, next) => {

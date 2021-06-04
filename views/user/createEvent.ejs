@@ -8,7 +8,7 @@
             <div class="container-fluid">
                 <h3 class="text-dark mb-4" style="text-align: center;">Add Event</h3>
             </div>
-            <form method="POST" action="/user/createEvent">
+            <form method="POST" action="/user/createEvent" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col">
                         <div class="form-group mb-3"><label class="form-label">Event Name</label><input class="form-control form-control <%= validationErrors.find((e) => e.param === 'eventName') ? 'invalid' : '' %>" type="text" required minlength="3" name="eventName" value="<%= oldInput.eventName %>"></div>

@@ -9,7 +9,7 @@
         </form>
         <% if (isAuthenticated) { %>
             <% if (allowedToCreateSociety) { %>
-                <a class="nav-link" href="/user/createSociety" style="color: var(--bs-gray-dark);box-shadow: 0px 0px;padding: 10px 16px;">CreateSociety</a>
+                <a class="nav-link <%= path === '/createSociety' ? 'active' : '' %>" href="/user/createSociety" style="color: var(--bs-gray-dark);box-shadow: 0px 0px;padding: 10px 16px;">CreateSociety</a>
 
                 <form method="POST" action="/auth/logout">
                     <button class="btn nav-link" type="submit" style="color: var(--bs-gray-dark);box-shadow: 0px 0px;padding: 10px 16px;">Logout</button>
@@ -33,9 +33,11 @@
             
 
         <% } else { %>
-            <a class="nav-link" href="/auth/signup" style="color: var(--bs-gray-dark);box-shadow: 0px 0px;padding: 10px 16px;">Sign In</a>
+            <a class="nav-link <%= path === '/signup' ? 'active' : 'inactive' %>" href="/auth/signup">Sign In</a>
 
-            <a class="nav-link" href="/auth/login" style="color: var(--bs-gray-dark);box-shadow: 0px 0px;padding: 10px 16px;">Login</a>
+            <a class="nav-link <%= path === '/login' ? 'active' : 'inactive' %>" href="/auth/login">Login</a>
+
+            <!-- <a href="#" class="nav-link active" style="color: var(--bs-gray-dark);box-shadow: 0px 0px;padding: 10px 16px">TEST</a> -->
 
         <% } %>
 

@@ -32,6 +32,7 @@ exports.getSignup = (req, res, next) => {
 exports.signup = (req, res, next) => {
 	const email = req.body.email;
 	const password = req.body.password;
+	const confirmPassword = req.body.confirmPassword;
 
 	const errors = validationResult(req);
 	console.log(errors);
@@ -51,6 +52,23 @@ exports.signup = (req, res, next) => {
 				confirmPassword: req.body.confirmPassword,
 			},
 			validationErrors: errors.array(),
+		});
+	}
+
+	if (password !== confirmPassword) {
+		return res.status(422).render('auth/signup', {
+			path: '/signup',
+			pageTitle: 'Sign Up',
+			errorMessage: "Passwords don't match",
+			oldInput: {
+				email: email,
+				password: '',
+				confirmPassword: '',
+			},
+			validationErrors: [
+				{ param: 'password' },
+				{ param: 'confirmPassword' },
+			],
 		});
 	}
 
@@ -146,10 +164,12 @@ exports.login = (req, res, next) => {
 			}
 			user = rows[0];
 			console.log('this should not run');
+			// return bcrypt.compare(password, user.password);
+
 			return bcrypt.compare(password, user.password);
 		})
 		.then((isEqual) => {
-			if (flag == true) {
+			if (flag === true) {
 				return;
 			}
 			if (!isEqual) {
@@ -205,4 +225,4 @@ exports.postLogout = (req, res, next) => {
 	delete req.session.isLoggedIn;
 	delete req.session.userId;
 	res.redirect('/');
-}
+};

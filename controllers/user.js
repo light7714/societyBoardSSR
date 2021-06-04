@@ -2,6 +2,9 @@ const util = require('util');
 const crypto = require('crypto');
 
 const { validationResult } = require('express-validator');
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
+const bcrypt = require('bcryptjs');
 
 const Event = require('../models/event');
 const User = require('../models/user');
@@ -10,6 +13,15 @@ const Society = require('../models/society');
 
 const fs = require('fs');
 const path = require('path');
+
+const transporter = nodemailer.createTransport(
+	sendgridTransport({
+		auth: {
+			//value to be obtained from sendgrid account (settings->api key->create new. added node-shop as name (one time))
+			api_key: process.env.API_KEY,
+		},
+	})
+);
 
 exports.getEvents = (req, res, next) => {
 	let groupId;
@@ -109,7 +121,9 @@ exports.createEvent = (req, res, next) => {
 	let loadedEvent;
 
 	const eventName = req.body.eventName;
-	const poster = req.body.poster;
+	//assuming frontend validation done
+	const poster = req.file.path;
+	console.log('poster:', poster);
 	const eventDesc = req.body.eventDesc;
 	const startDate = req.body.startDate;
 	const endDate = req.body.endDate;
@@ -119,32 +133,32 @@ exports.createEvent = (req, res, next) => {
 
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
-		res.status(422).render('user/createEvent', {
+		return res.status(422).render('user/createEvent', {
 			path: '/createEvent',
 			pageTitle: 'Create Event',
 			errorMessage: errors.array()[0].msg,
 			oldInput: {
-				eventName: '',
-				eventDesc: '',
-				startDate: '',
-				endDate: '',
+				eventName: eventName,
+				eventDesc: eventDesc,
+				startDate: startDate,
+				endDate: endDate,
 			},
 			validationErrors: errors.array(),
 		});
 	}
 
-	// if (!req.file) {
-	// 	const error = new Error('No poster provided');
-	// 	error.statusCode = 422;
-	// 	throw err;
-	// }
+	if (!req.file) {
+		const error = new Error('No poster provided');
+		error.statusCode = 422;
+		throw err;
+	}
 
 	//we have req.userId available, now need to query db and find the societyId of the user who created event.
 	//we have userId, need to find groupId of that user from users db, we can use the groupId to find societyId from groups db
 	//Remember, we also need to fill groups db with dummy data, so that we can assume the groupId in user db is not null now
 
 	// req.userId = 'fd29931b0ebfa36bf428e3ef07c6fd6ae76563b0';
-	console.log('create event post');
+	// console.log('create event post');
 	User.findGroupIdByUserId(req.userId)
 		.then(([rows, data]) => {
 			if (rows.length <= 0) {
@@ -259,7 +273,7 @@ exports.editEvent = (req, res, next) => {
 	const eventId = req.body.eventId;
 	const societyId = req.body.societyId;
 	const eventName = req.body.eventName;
-	const poster = req.body.poster;
+	const poster = req.file.path;
 	const eventDesc = req.body.eventDesc;
 	const startDate = req.body.startDate;
 	const endDate = req.body.endDate;
@@ -291,11 +305,10 @@ exports.editEvent = (req, res, next) => {
 			validationErrors: errors.array(),
 		});
 	}
-	
 
-	if (req.file) {
-		poster = req.file.path;
-	}
+	// if (req.file) {
+	// 	poster = req.file.path;
+	// }
 	if (!poster) {
 		const error = new Error('No poster picked');
 		error.statusCode = 422;
@@ -310,9 +323,8 @@ exports.editEvent = (req, res, next) => {
 				next(error);
 			}
 
-
 			event = rows[0];
-		
+
 			//if nothing retrieved from sql, internal error
 			return Group.findGroupIdBySocietyId(societyId);
 		})
@@ -427,7 +439,7 @@ exports.deleteEvent = (req, res, next) => {
 			}
 			// console.log('see proper err handling here too, what if no event was deleted? what will we receive in result?:', result);
 			clearImage(event.poster);
-			
+
 			console.log(res.locals.eventIsDeleted);
 			res.locals.eventIsDeleted = true;
 			return res.redirect('/user/events');
@@ -500,7 +512,7 @@ exports.postCreateSociety = (req, res, next) => {
 
 	const societyName = req.body.societyName;
 	//do req.file.logo later
-	const logo = req.body.logo;
+	// const logo = req.body.logo;
 	const societyDesc = req.body.societyDesc;
 	const dateEst = req.body.dateEst;
 	const website = req.body.website;
@@ -511,16 +523,16 @@ exports.postCreateSociety = (req, res, next) => {
 	let user2Password;
 	let user3Password;
 
-	console.log('in postCreateSociety');
+	// console.log('in postCreateSociety');
 
-	if (req.file) {
-		logo = req.file.logo;
-	}
-	if (!logo) {
-		const error = new Error('No logo picked');
-		error.statusCode = 422;
-		throw error;
-	}
+	// if (req.file) {
+	// 	logo = req.file.logo;
+	// }
+	// if (!logo) {
+	// 	const error = new Error('No logo picked');
+	// 	error.statusCode = 422;
+	// 	throw error;
+	// }
 
 	const errors = validationResult(req);
 	console.log(errors);
@@ -575,11 +587,11 @@ exports.postCreateSociety = (req, res, next) => {
 			return randomBytes(20);
 		})
 		.then((buffer) => {
+			console.log('hiii');
 			societyId = buffer.toString('hex');
 			const society = new Society(
 				societyId,
 				societyName,
-				logo,
 				societyDesc,
 				dateEst,
 				website,
@@ -642,24 +654,31 @@ exports.postCreateSociety = (req, res, next) => {
 			//saving user2 and user3 in users db
 			//BUG DIDNT FIND GROUPID -- resolved
 
+			return bcrypt.hash(user2Password, 12);
+		})
+		.then((hashedPassword) => {
 			const user2 = new User(
 				user2Id,
 				user2Email,
-				user2Password,
+				hashedPassword,
 				loadedGroupId
 			);
 			return user2.save();
 		})
 		.then((result) => {
+			return bcrypt.hash(user3Password, 12);
+
 			// if (result.affectedRows <= 0) {
 			// 	const error = new Error('Internal server error');
 			// 	error.statusCode = 500;
 			// 	next(error);
 			// }
+		})
+		.then((hashedPassword) => {
 			const user3 = new User(
 				user3Id,
 				user3Email,
-				user3Password,
+				hashedPassword,
 				loadedGroupId
 			);
 			return user3.save();
@@ -685,6 +704,21 @@ exports.postCreateSociety = (req, res, next) => {
 			// });
 			req.flash('success', 'Society has been created successfully');
 			res.redirect('/');
+
+			transporter.sendMail({
+				to: user2Email,
+				//verified account to send emails
+				from: 'shubhamlightning99@gmail.com',
+				subject: 'SocietyBoard: Sign Up succesfull!',
+				text: `Your email: ${user2Email}, password: ${user2Password}`,
+			});
+			transporter.sendMail({
+				to: user3Email,
+				//verified account to send emails
+				from: 'shubhamlightning99@gmail.com',
+				subject: 'SocietyBoard: Sign Up succesfull!',
+				text: `Your email: ${user3Email}, password: ${user3Password}`,
+			});
 		})
 		.catch((err) => {
 			//findGroupIdByUserId error --resolved above

@@ -20,6 +20,12 @@ router.post(
 		body('eventDesc').trim().isLength({ min: 10, max: 1000 }),
 		body('website').trim().isLength({ max: 100 }),
 		body('discord').trim().isLength({ max: 100 }),
+		body('startDate')
+			.custom((value, { req }) => {
+				console.log(value, req.body.endDate);
+				return req.body.endDate >= value;
+			})
+			.withMessage('startDate must be before endDate'),
 	],
 	userController.createEvent
 );
