@@ -18,3 +18,5 @@ if someone else's event id is entered manually, then handle later
 Not Authenticated: Signup, login
 Authenticated: Create Society, logout, avatar(profile page)
 After creating society, create society to not be shown
+
+<b> Note: </b> Also made an API version of this project: https://github.com/light7714/societyBoardAPI
